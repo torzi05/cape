@@ -62,8 +62,8 @@ ansible localhost -m command -a 'id' --become
 
 ansible localhost -m file -a 'path="/tmp/vagrant.rpm" state="absent"' -become
 #ansible localhost -m file -a 'path="~/cape" state="directory"'
-ansible localhost -m yum -a 'name="git" state="present"'
-ansible localhost -m git -a 'repo="https://github.com/torzi05/cape.git" dest="~/cape"'
+ansible localhost -m yum -a 'name="git" state="present"' --become
+ansible localhost -m git -a 'repo="https://github.com/torzi05/cape.git" dest="~/cape"' 
 
 cd ~/cape ; vagrant up 
 

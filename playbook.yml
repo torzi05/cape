@@ -1,0 +1,68 @@
+--- 
+- name: Who
+  hosts: all
+  become: true
+  tasks:
+    - name: id
+      command: 'id'
+      register: id_result
+    - name: show id
+      debug:
+        var: id_result
+- name: Vagrant playbook
+  hosts: all
+  become: true
+  tasks:
+    - name: Connection test
+      ping:
+    - name: Create .ssh directory
+      file: 
+        path: "/root/.ssh"
+        state: directory
+    - name: Create authorized_keys file
+      file: 
+        path: "/root/.ssh/authorized_keys"
+        state: touch
+    - name: Deploy public key
+      authorized_key:
+        user: root
+        state: present
+        key: "{{ lookup('file', '~/.ssh/id_rsa.pub')}}"
+
+    - name: life hack
+      debug: 
+        var: ansible_facts.ssh_host_key_rsa_public 
+    - name: life hack
+      debug: 
+        var: ansible_facts.all_ipv4_addresses[1]         
+    - name: life hack
+      debug: 
+        var: ansible_facts.fqdn 
+
+    - name:
+      copy: 
+        content: "{{ ansible_facts.fqdn }},{{ ansible_facts.all_ipv4_addresses[1] }} ssh-rsa {{ ansible_facts.ssh_host_key_rsa_public }}"
+        dest: /tmp/key
+    - name:
+      fetch: 
+        dest: /tmp/control
+        src: /tmp/key
+    - name:
+      package:
+        name: python3-libselinux
+        state: present
+    - name:
+      file:
+        path: "~/.ssh/known_hosts"
+        state: touch
+    - name: 
+      lineinfile:
+        path: "/etc/ssh/ssh_config"
+        regexp: '^#   StrictHostKeyChecking ask'
+        line: StrictHostKeyChecking no
+#    - name:
+#      lineinfile:
+#        path: "/etc/hosts"
+#        regexp: "^{{ ansible_facts.all_ipv4_addresses[1] }}"
+#        line: "{{ ansible_facts.all_ipv4_addresses[1] }} {{ ansible_facts.fqdn }} {{ inventory_hostname }}"
+...
