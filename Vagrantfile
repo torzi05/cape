@@ -31,6 +31,6 @@ Vagrant.configure("2") do |config|
 		classroom.vm.network "private_network" , ip: "172.25.250.254"
 	end
 	config.vm.provision :ansible do |ansible|
- 	ansible.playbook = "playbook.yml"
+ 	ansible.playbook = "boot.yml"
 end
 end

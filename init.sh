@@ -56,14 +56,19 @@ else
 	echo $pw | sudo yum localinstall -y /tmp/vagrant.rpm
 fi
 
-ansible localhost -m command -a 'id' 
-
-ansible localhost -m command -a 'id' --become
-
-ansible localhost -m file -a 'path="/tmp/vagrant.rpm" state="absent"' -become
-#ansible localhost -m file -a 'path="~/cape" state="directory"'
-ansible localhost -m yum -a 'name="git" state="present"' --become
+ansible localhost -m file -a 'path="/tmp/vagrant.rpm" state="absent"' -b
+ansible localhost -m lineinfile -a 'path="~/cape" state="directory"'
+ansible localhost -m yum -a 'name="git" state="present"' -b
 ansible localhost -m git -a 'repo="https://github.com/torzi05/cape.git" dest="~/cape"' 
+
+ansible localhost -b -m lineinfile -a 'path="/etc/hosts" line="172.15.250.9 workstation workstation.lab.example.com" create="true"'
+#ansible localhost -b -m lineinfile -a 'path="/etc/hosts" line="172.15.250.10 servera servera.lab.example.com" create="true"'
+#ansible localhost -b -m lineinfile -a 'path="/etc/hosts" line="172.15.250.11 serverb  serverb.lab.example.com" create="true"'
+#ansible localhost -b -m lineinfile -a 'path="/etc/hosts" line="172.15.250.12 serverc  serverc.lab.example.com" create="true"'
+#ansible localhost -b -m lineinfile -a 'path="/etc/hosts" line="172.15.250.13 serverd  serverd.lab.example.com" create="true"'
+
+echo $pw | sudo ~/cape/playbook.yml
+
 
 cd ~/cape ; vagrant up 
 
