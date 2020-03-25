@@ -3,11 +3,11 @@ test repo
 # How it works?
 1. init.sh 
 	- Shell
-		- privilige escalation 
-		- check dependencies
+		- Privilige escalation  
+		- Check dependencies
 	- Ansible
 		- Install dependencies
-		- Get project source
+		- Get project source from git
 	- Vagrant
 		- Create virtual network
 		- Create multiple VMs
