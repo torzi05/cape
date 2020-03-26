@@ -73,7 +73,7 @@ ansible localhost -b -m lineinfile -a 'path="/etc/hosts" line="172.25.250.10 ser
 ansible localhost -b -m lineinfile -a 'path="/etc/hosts" line="172.25.250.11 serverb serverb.lab.example.com"'
 ansible localhost -b -m lineinfile -a 'path="/etc/hosts" line="172.25.250.12 serverc serverc.lab.example.com"'
 ansible localhost -b -m lineinfile -a 'path="/etc/hosts" line="172.25.250.13 serverd serverd.lab.example.com"'
-ansible localhost -b -m lineinfile -a 'path="/etc/hosts" line="172.25.250.254 classroom classroom.lab.example.com"'
+ansible localhost -b -m lineinfile -a 'path="/etc/hosts" line="172.25.250.254 classroom classroom.example.com"'
 
 if [[ "$1" == "test" ]] ; then 
 	echo Test run without vagrant up
