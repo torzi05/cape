@@ -74,7 +74,7 @@ ansible localhost -b -m lineinfile -a 'path="/etc/hosts" line="172.15.250.11 ser
 ansible localhost -b -m lineinfile -a 'path="/etc/hosts" line="172.15.250.12 serverc serverc.lab.example.com"'
 ansible localhost -b -m lineinfile -a 'path="/etc/hosts" line="172.15.250.13 serverd serverd.lab.example.com"'
 
-#cd ~/cape ; vagrant up 
+cd ~/cape ; vagrant up 
 
 list="workstation.lab.example.com servera.lab.example.com serverb.lab.example.com serverc.lab.example.com serverd.lab.example.com"
 

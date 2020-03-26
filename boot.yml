@@ -1,28 +1,20 @@
+# boot.yml for Vagrant provision
 --- 
-- name: Who
+- name: Vagrant internal provisioning 
   hosts: all
   become: true
   tasks:
-    - name: id
-      command: 'id'
-      register: id_result
-    - name: show id
-      debug:
-        var: id_result
-- name: Vagrant playbook
-  hosts: all
-  become: true
-  tasks:
-    - name: Connection test
-      ping:
+    
     - name: Create .ssh directory
       file: 
         path: "/root/.ssh"
         state: directory
+
     - name: Create authorized_keys file
       file: 
         path: "/root/.ssh/authorized_keys"
         state: touch
+
     - name: Deploy public key
       authorized_key:
         user: root
