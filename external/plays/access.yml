@@ -1,0 +1,42 @@
+# access.yml external
+---
+- name: Access control
+  hosts: all
+  remote_user: root
+  tasks:
+    
+    - name: Create .shh directory
+      file:
+        path: "{{ item }}.ssh"
+        state: directory
+      loop: 
+        - /home/sutdent/
+        - /home/devops/
+        - /root/
+
+    - name: Create authorized_keys file
+      file:
+        path: "{{ item }}.ssh/authorized_keys"
+        state: touch
+      loop: 
+        - /home/sutdent/
+        - /home/devops/
+        - /root/
+
+    - name: Deploy SSH public key
+      authorized_key:
+        user: "{{ item }}"
+        key: "{{ lookup ('file', '/tmp/student.pub')}}"
+        state: present
+      loop: 
+        - student
+        - devops
+        - root
+
+    - name: Remove temp files
+      file:
+        path: /tmp/student.pub
+        state: absent
+      run_once: true
+      delegate_to: localhost
+...

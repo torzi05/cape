@@ -1,0 +1,355 @@
+#!/bin/bash
+
+if [[ "$1" == "intro-install" ]] && [[ "$2" == "start" ]] ; then
+	echo -e "\nSetting up the environment for the exercise:\n"	
+	yum remove -y ansible &> /dev/null 
+	echo -e "  - Configuring control node packages: \e[1;32mSUCCESS\e[0;39m\n"
+elif [[ "$1" == "intro-install" ]] && [[ "$2" == "finish" ]] ; then
+	echo -e "\nCleaning up the environment:\n"	 
+	echo -e "  - Cleaning up: \e[1;32mSUCCESS\e[0;39m\n"
+
+elif [[ "$1" == "deploy-inventory" ]] && [[ "$2" == "start" ]] ; then
+	echo -e "\nSetting up workstation lab for the exercise:\n"	
+	yum install -y ansible &> /dev/null 
+	echo -e "  - Verify ansible is installed on workstation control node: \e[1;32mSUCCESS\e[0;39m"
+	cp /etc/ansible/hosts /etc/ansible/hosts.bak &>/dev/null	
+	echo -e "  - Backup /etc/ansible/hosts inventory:                     \e[1;32mSUCCESS\e[0;39m\n"
+
+elif [[ "$1" == "deploy-inventory" ]] && [[ "$2" == "finish" ]] ; then
+	echo -e "\nCleaning up the environment:\n" 
+	mv /etc/ansible/hosts.bak /etc/ansible/hosts &>/dev/null
+	chmod 644 /etc/ansible/hosts &>/dev/null	
+	echo -e "  - Restore /etc/ansible/hosts: \e[1;32mSUCCESS\e[0;39m\n"
+
+elif [[ "$1" == "deploy-manage" ]] && [[ "$2" == "start" ]] ; then
+	ping -c1 servera &>/dev/null	
+		if [[ "$?" -eq "0" ]] ; then
+  		echo "START PASS"
+		else
+			echo "Env. error"
+			exit 2
+		fi
+elif [[ "$1" == "deploy-manage" ]] && [[ "$2" == "finish" ]] ; then
+  echo "FINISH PASS"
+
+elif [[ "$1" == "deploy-adhoc" ]] && [[ "$2" == "start" ]] ; then
+	mkdir /home/student/deploy-adhoc
+	cd /home/student/deploy-adhoc
+	echo -e '[defaults]\ninventory=inventory' > ansible.cfg 		
+	echo -e '[control_node]\nlocalhost\n\n[intranetweb]\nservera.lab.example.com' > inventory
+	chown -R student:student /home/student
+  echo "START PASS"
+elif [[ "$1" == "deploy-adhoc" ]] && [[ "$2" == "finish" ]] ; then
+	cd /home/student/deploy-adhoc
+	sudo -u student ansible all -m copy -a 'dest="/etc/motd" content=""' -u devops --become 
+  echo "FINISH PASS"
+
+elif [[ "$1" == "deploy-review" ]] && [[ "$2" == "start" ]] ; then
+# < ? >
+  echo "START PASS"
+elif [[ "$1" == "deploy-review" ]] && [[ "$2" == "finish" ]] ; then
+	cd /home/student/deploy-review
+	sudo -u student ansible all -m copy -a 'dest="/etc/motd" content=""' -u devops --become 
+  echo "FINISH PASS"
+
+
+elif [[ "$1" == "playbook-basic" ]] && [[ "$2" == "start" ]] ; then
+# rsync dependency
+	mkdir -p /home/student/playbook-basic/files
+	cd /home/student/playbook-basic
+	wget http://classroom.example.com/labs/playbook-basic/ansible.cfg
+	wget http://classroom.example.com/labs/playbook-basic/inventory
+	cd /home/student/playbook-basic/files
+	wget http://classroom.example.com/labs/playbook-basic/files/index.html
+	chown -R student:student /home/student
+  echo "START PASS"
+elif [[ "$1" == "playbook-basic" ]] && [[ "$2" == "finish" ]] ; then
+	cd /home/student/playbook-basic
+	sudo -u student ansible all -m file -a 'path="/var/www/html/index.html" state="absent"' -u devops --become 
+	sudo -u student ansible all -m yum -a 'name="httpd" state="absent"' -u devops --become 
+  echo "FINISH PASS"
+
+
+elif [[ "$1" == "playbook-multi" ]] && [[ "$2" == "start" ]] ; then
+	ansible localhost -m file -a 'path="/home/student/playbook-multi" state="directory"' -u student
+	cd /home/student/playbook-multi
+	wget http://classroom.example.com/labs/playbook-multi/ansible.cfg
+	wget http://classroom.example.com/labs/playbook-multi/inventory
+	sudo -u student ansible servera.lab.example.com -m service -a 'name="firewalld" state="started"' -u devops --become
+	chown -R student:student /home/student
+  echo "START PASS"
+elif [[ "$1" == "playbook-multi" ]] && [[ "$2" == "finish" ]] ; then
+	cd /home/student/playbook-multi
+	sudo -u student ansible all -m file -a 'path="/var/www/html/index.html" state="absent"' -u devops --become 
+	sudo -u student ansible all -m yum -a 'name="httpd" state="absent"' -u devops --become 
+	sudo -u student ansible servera.lab.example.com -m service -a 'name="firewalld" state="stopped"' -u devops --become
+  echo "FINISH PASS"
+
+elif [[ "$1" == "playbook-review" ]] && [[ "$2" == "start" ]] ; then
+	ansible localhost -m file -a 'path="/home/student/playbook-review" state="directory"' -u student
+	cd /home/student/playbook-review
+	wget http://classroom.example.com/src/playbook-review/ansible.cfg
+	wget http://classroom.example.com/src/playbook-review/inventory
+	chown -R student:student /home/student
+  echo "START PASS"
+elif [[ "$1" == "playbook-review" ]] && [[ "$2" == "finish" ]] ; then
+	cd /home/student/playbook-review
+	sudo -u student ansible serverb.lab.example.com -m file -a 'path="/var/www/html/index.php" state="absent"' -u devops --become 
+	sudo -u student ansible all -m yum -a 'name="httpd" state="absent"' -u devops --become 
+	sudo -u student ansible all -m yum -a 'name="mariadb-server" state="absent"' -u devops --become 
+	sudo -u student ansible all -m yum -a 'name="php" state="absent"' -u devops --become 
+	sudo -u student ansible all -m yum -a 'name="php-mysqlnd" state="absent"' -u devops --become 
+	sudo -u student ansible all -m service -a 'name="firewalld" state="stopped" enabled="false"' -u devops --become
+  echo "FINISH PASS"
+
+elif [[ "$1" == "data-variables" ]] && [[ "$2" == "start" ]] ; then
+	ansible localhost -m file -a 'path="/home/student/data-variables" state="directory"' -u student
+	cd /home/student/data-variables
+	wget http://classroom.example.com/src/data-variables/ansible.cfg
+	wget http://classroom.example.com/src/data-variables/inventory
+	chown -R student:student /home/student
+  echo "START PASS"
+elif [[ "$1" == "data-variables" ]] && [[ "$2" == "finish" ]] ; then
+	cd /home/student/data-variables
+	sudo -u student ansible servera.lab.example.com -m file -a 'path="/var/www/html/index.html" state="absent"' -u devops --become 
+	sudo -u student ansible all -m yum -a 'name="httpd" state="absent"' -u devops --become 
+  sudo -u student ansible all -m yum -a 'name="python3-PyMySQL" state="absent"' -u devops --become 
+	sudo -u student ansible all -m firewalld -a 'service="http" state="disabled" permanent="true"' -u devops --become 
+	sudo -u student ansible all -m service -a 'name="firewalld" state="stopped" enabled="false"' -u devops --become
+  echo "FINISH PASS"
+
+elif [[ "$1" == "data-secret" ]] && [[ "$2" == "start" ]] ; then
+	ansible localhost -m file -a 'path="/home/student/data-secret" state="directory"' -u student
+  ansible localhost -m get_url -a 'url="http://classroom.example.com/src/data-secret/ansible.cfg" dest="/home/student/data-secret/ansible.cfg"' -u devops  
+	ansible localhost -m file -a 'path="/home/student/data-secret/inventory" state="directory"' -u student
+  ansible localhost -m get_url -a 'url="http://classroom.example.com/src/data-secret/inventory/hosts" dest="/home/student/data-secret/inventory/hosts"' -u devops  
+  ansible localhost -m get_url -a 'url="http://classroom.example.com/src/data-secret/secret.yml" dest="/home/student/data-secret/secret.yml"' -u devops  
+	chown -R student:student /home/student
+  echo "START PASS"
+elif [[ "$1" == "data-secret" ]] && [[ "$2" == "finish" ]] ; then
+	cd /home/student/data-secret
+	sudo -u student ansible servera.lab.example.com -m user -a 'name="ansibleuser1" state="absent"' -u devops --become 
+  echo "FINISH PASS"
+
+elif [[ "$1" == "data-facts" ]] && [[ "$2" == "start" ]] ; then
+	ansible localhost -m file -a 'path="/home/student/data-facts" state="directory"' -u student
+  ansible localhost -m get_url -a 'url="http://classroom.example.com/src/data-facts/ansible.cfg" dest="/home/student/data-facts/ansible.cfg"' -u devops  
+  ansible localhost -m get_url -a 'url="http://classroom.example.com/src/data-facts/inventory" dest="/home/student/data-facts/inventory"' -u devops  
+	chown -R student:student /home/student
+  echo "START PASS"
+elif [[ "$1" == "data-facts" ]] && [[ "$2" == "finish" ]] ; then
+	cd /home/student/data-secret
+	sudo -u student ansible all -m yum -a 'name="httpd" state="absent"' -u devops --become 
+  sudo -u student ansible all -m file -a 'path="/etc/ansible/facts.d" state="absent"' -u devops --become 
+  echo "FINISH PASS"
+
+elif [[ "$1" == "data-review" ]] && [[ "$2" == "start" ]] ; then
+	ansible localhost -m file -a 'path="/home/student/data-review" state="directory"' -u student
+	ansible localhost -m file -a 'path="/home/student/data-review/files" state="directory"' -u student
+  ansible localhost -m get_url -a 'url="http://classroom.example.com/src/data-review/ansible.cfg" dest="/home/student/data-review/ansible.cfg"' -u devops  
+  ansible localhost -m get_url -a 'url="http://classroom.example.com/src/data-review/inventory" dest="/home/student/data-review/inventory"' -u devops  
+  ansible localhost -m get_url -a 'url="http://classroom.example.com/src/data-review/files/htpasswd" dest="/home/student/data-review/files/htpasswd"' -u devops  
+  ansible localhost -m get_url -a 'url="http://classroom.example.com/src/data-review/files/httpd.conf" dest="/home/student/data-review/files/httpd.conf"' -u devops  
+  ansible localhost -m get_url -a 'url="http://classroom.example.com/src/data-review/files/htaccess" dest="/home/student/data-review/files/.htaccess"' -u devops  
+	chown -R student:student /home/student
+  echo "START PASS"
+elif [[ "$1" == "data-review" ]] && [[ "$2" == "finish" ]] ; then
+	cd /home/student/data-review
+	sudo -u student ansible all -m yum -a 'name="httpd" state="absent"' -u devops --become 
+	sudo -u student ansible all -m yum -a 'name="mod_ssl" state="absent"' -u devops --become 
+  sudo -u student ansible all -m file -a 'path="/var/www/html/" state="absent"' -u devops --become 
+#neeeds to be check
+  sudo -u student ansible all -m file -a 'path="/var/www/html" state="present"' -u devops --become 
+	sudo -u student ansible all -m service -a 'name="firewalld" state="stopped" enabled="false"' -u devops --become
+  echo "FINISH PASS"
+
+elif [[ "$1" == "control-flow" ]] && [[ "$2" == "start" ]] ; then
+	ansible localhost -m file -a 'path="/home/student/control-flow" state="directory"' -u student
+  ansible localhost -m get_url -a 'url="http://classroom.example.com/src/control-flow/ansible.cfg" dest="/home/student/control-flow/ansible.cfg"' -u devops  
+  ansible localhost -m get_url -a 'url="http://classroom.example.com/src/control-flow/inventory" dest="/home/student/control-flow/inventory"' -u devops  
+	chown -R student:student /home/student
+  echo "START PASS"
+elif [[ "$1" == "control-flow" ]] && [[ "$2" == "finish" ]] ; then
+	cd /home/student/control-flow
+	sudo -u student ansible all -m yum -a 'name="python3-PyMySQL" state="absent"' -u devops --become 
+  sudo -u student ansible all -m yum -a 'name="mariadb-server" state="absent"' -u devops --become 
+  echo "FINISH PASS"
+
+elif [[ "$1" == "control-handlers" ]] && [[ "$2" == "start" ]] ; then
+	ansible localhost -m file -a 'path="/home/student/control-handlers" state="directory"' -u student
+  ansible localhost -m get_url -a 'url="http://classroom.example.com/src/control-handlers/ansible.cfg" dest="/home/student/control-handlers/ansible.cfg"' -u devops  
+  ansible localhost -m get_url -a 'url="http://classroom.example.com/src/control-handlers/inventory" dest="/home/student/control-handlers/inventory"' -u devops  
+  ansible localhost -m get_url -a 'url="http://classroom.example.com/src/control-handlers/configure_db.yml" dest="/home/student/control-handlers/configure_db.yml"' -u devops  
+	chown -R student:student /home/student
+  echo "START PASS"
+elif [[ "$1" == "control-handlers" ]] && [[ "$2" == "finish" ]] ; then
+	cd /home/student/control-handlers
+	sudo -u student ansible all -m yum -a 'name="python3-PyMySQL" state="absent"' -u devops --become 
+  sudo -u student ansible all -m yum -a 'name="mariadb-server" state="absent"' -u devops --become 
+  sudo -u student ansible all -m file -a 'path="/etc/my.cnf" state="absent"' -u devops --become 
+  echo "FINISH PASS"
+
+elif [[ "$1" == "control-errors" ]] && [[ "$2" == "start" ]] ; then
+	ansible localhost -m file -a 'path="/home/student/control-errors" state="directory"' -u student
+  ansible localhost -m get_url -a 'url="http://classroom.example.com/src/control-errors/ansible.cfg" dest="/home/student/control-errors/ansible.cfg"' -u devops  
+  ansible localhost -m get_url -a 'url="http://classroom.example.com/src/control-errors/inventory" dest="/home/student/control-errors/inventory"' -u devops  
+	chown -R student:student /home/student
+  echo "START PASS"
+elif [[ "$1" == "control-errors" ]] && [[ "$2" == "finish" ]] ; then
+	cd /home/student/control-errors
+	sudo -u student ansible all -m yum -a 'name="httpd" state="absent"' -u devops --become 
+  sudo -u student ansible all -m yum -a 'name="mariadb-server" state="absent"' -u devops --become 
+  echo "FINISH PASS"
+
+elif [[ "$1" == "control-review" ]] && [[ "$2" == "start" ]] ; then
+	ansible localhost -m file -a 'path="/home/student/control-review" state="directory"' -u student
+  ansible localhost -m get_url -a 'url="http://classroom.example.com/src/control-review/ansible.cfg" dest="/home/student/control-review/ansible.cfg"' -u devops  
+  ansible localhost -m get_url -a 'url="http://classroom.example.com/src/control-review/inventory" dest="/home/student/control-review/inventory"' -u devops 
+  ansible localhost -m get_url -a 'url="http://classroom.example.com/src/control-review/index.html" dest="/home/student/control-review/index.html"' -u devops 
+  ansible localhost -m get_url -a 'url="http://classroom.example.com/src/control-review/playbook.yml" dest="/home/student/control-review/playbook.yml"' -u devops 
+  ansible localhost -m get_url -a 'url="http://classroom.example.com/src/control-review/vars.yml" dest="/home/student/control-review/vars.yml"' -u devops 
+  ansible localhost -m get_url -a 'url="http://classroom.example.com/src/control-review/ssl.conf" dest="/home/student/control-review/ssl.conf"' -u devops 
+  ansible localhost -m get_url -a 'url="http://classroom.example.com/src/control-review/server.key" dest="/home/student/control-review/server.key"' -u devops 
+  ansible localhost -m get_url -a 'url="http://classroom.example.com/src/control-review/server.crt" dest="/home/student/control-review/server.crt"' -u devops 
+	chown -R student:student /home/student
+  echo "START PASS"
+elif [[ "$1" == "control-review" ]] && [[ "$2" == "finish" ]] ; then
+	cd /home/student/control-review
+# firewall, services, files /etc/httpd/ /var/www/ 
+  sudo -u student ansible all -m file -a 'path="/var/www/html" state="absent"' -u devops --become 
+  sudo -u student ansible all -m file -a 'path="/var/www/html" state="directory"' -u devops --become 
+	sudo -u student ansible all -m yum -a 'name="httpd" state="absent"' -u devops --become 
+  sudo -u student ansible all -m yum -a 'name="mod_ssl" state="absent"' -u devops --become 
+  echo "FINISH PASS"
+
+elif [[ "$1" == "file-manage" ]] && [[ "$2" == "start" ]] ; then
+	ansible localhost -m file -a 'path="/home/student/file-manage" state="directory"' -u student
+	ansible localhost -m file -a 'path="/home/student/file-manage/files" state="directory"' -u student
+  ansible localhost -m get_url -a 'url="http://classroom.example.com/src/file-manage/ansible.cfg" dest="/home/student/file-manage/ansible.cfg"' -u devops  
+  ansible localhost -m get_url -a 'url="http://classroom.example.com/src/file-manage/inventory" dest="/home/student/file-manage/inventory"' -u devops 
+  ansible localhost -m get_url -a 'url="http://classroom.example.com/src/file-manage/files/users.txt" dest="/home/student/file-manage/files/users.txt"' -u devops 
+	chown -R student:student /home/student
+  echo "START PASS"
+elif [[ "$1" == "file-manage" ]] && [[ "$2" == "finish" ]] ; then
+	ansible localhost -m file -a 'path="/home/student/file-manage/secure-backups" state="absent"' -u student
+	cd /home/student/file-manage
+  sudo -u student ansible all -m file -a 'path="/home/devops/users.txt" state="absent"' -u devops --become 
+  echo "FINISH PASS"
+
+elif [[ "$1" == "file-template" ]] && [[ "$2" == "start" ]] ; then
+	ansible localhost -m file -a 'path="/home/student/file-template" state="directory"' -u student
+	ansible localhost -m file -a 'path="/home/student/file-template/files" state="directory"' -u student
+  ansible localhost -m get_url -a 'url="http://classroom.example.com/src/file-template/ansible.cfg" dest="/home/student/file-template/ansible.cfg"' -u devops  
+  ansible localhost -m get_url -a 'url="http://classroom.example.com/src/file-template/files/inventory" dest="/home/student/file-template/files/inventory"' -u devops 
+  ansible localhost -m get_url -a 'url="http://classroom.example.com/src/file-template/files/motd.j2" dest="/home/student/file-template/files/motd.j2"' -u devops 
+  ansible localhost -m get_url -a 'url="http://classroom.example.com/src/file-template/files/motd.yml" dest="/home/student/file-template/files/motd.yml"' -u devops 
+	chown -R student:student /home/student
+  echo "START PASS"
+elif [[ "$1" == "file-template" ]] && [[ "$2" == "finish" ]] ; then
+	cd /home/student/file-template
+ sudo -u student ansible all -m copy -a 'dest="/etc/motd" content=""' -u devops --become 
+  echo "FINISH PASS"
+
+elif [[ "$1" == "file-review" ]] && [[ "$2" == "start" ]] ; then
+	ansible localhost -m file -a 'path="/home/student/file-review" state="directory"' -u student
+	ansible localhost -m file -a 'path="/home/student/file-review/files" state="directory"' -u student
+  ansible localhost -m get_url -a 'url="http://classroom.example.com/src/file-review/ansible.cfg" dest="/home/student/file-review/ansible.cfg"' -u devops  
+  ansible localhost -m get_url -a 'url="http://classroom.example.com/src/file-review/files/inventory" dest="/home/student/file-review/files/inventory"' -u devops 
+  ansible localhost -m get_url -a 'url="http://classroom.example.com/src/file-review/files/motd.j2" dest="/home/student/file-review/files/motd.j2"' -u devops 
+  ansible localhost -m get_url -a 'url="http://classroom.example.com/src/file-review/files/motd.yml" dest="/home/student/file-review/files/motd.yml"' -u devops 
+  ansible localhost -m get_url -a 'url="http://classroom.example.com/src/file-review/files/issue" dest="/home/student/file-review/files/issue"' -u devops 
+	chown -R student:student /home/student
+  echo "START PASS"
+elif [[ "$1" == "file-review" ]] && [[ "$2" == "finish" ]] ; then
+	cd /home/student/file-review
+	sudo -u student ansible all -m copy -a 'dest="/etc/motd" content=""' -u devops --become 
+	sudo -u student ansible all -m file -a 'path="/etc/issue.net" state="absent"' -u devops --become 
+	sudo -u student ansible all -m file -a 'path="/etc/issue" state="absent"' -u devops --become 
+  echo "FINISH PASS"
+
+elif [[ "$1" == "projects-host" ]] && [[ "$2" == "start" ]] ; then
+	ansible localhost -m file -a 'path="/home/student/projects-host" state="directory"' -u student
+  ansible localhost -m get_url -a 'url="http://classroom.example.com/src/projects-host/ansible.cfg" dest="/home/student/projects-host/ansible.cfg"' -u devops  
+  ansible localhost -m get_url -a 'url="http://classroom.example.com/src/projects-host/inventory1" dest="/home/student/projects-host/inventory1"' -u devops 
+  ansible localhost -m get_url -a 'url="http://classroom.example.com/src/projects-host/inventory2" dest="/home/student/projects-host/inventory2"' -u devops 
+  ansible localhost -m get_url -a 'url="http://classroom.example.com/src/projects-host/playbook.yml" dest="/home/student/projects-host/playbook.yml"' -u devops 
+	chown -R student:student /home/student
+  echo "START PASS"
+elif [[ "$1" == "projects-host" ]] && [[ "$2" == "finish" ]] ; then
+#	Do nothing
+	cd /home/student/projets-host
+ echo "FINISH PASS"
+
+elif [[ "$1" == "projects-inventory" ]] && [[ "$2" == "start" ]] ; then
+	ansible localhost -m file -a 'path="/home/student/projects-inventory" state="directory"' -u student
+  ansible localhost -m get_url -a 'url="http://classroom.example.com/src/projects-inventory/ansible.cfg" dest="/home/student/projects-inventory/ansible.cfg"' -u devops  
+	chown -R student:student /home/student
+  echo "START PASS"
+elif [[ "$1" == "projects-inventory" ]] && [[ "$2" == "finish" ]] ; then
+#	Do nothing
+	cd /home/student/projects-inventory
+ echo "FINISH PASS"
+
+elif [[ "$1" == "projects-parallelism" ]] && [[ "$2" == "start" ]] ; then
+	ansible localhost -m file -a 'path="/home/student/projects-parallelism" state="directory"' -u student
+  ansible localhost -m get_url -a 'url="http://classroom.example.com/src/projects-parallelism/ansible.cfg" dest="/home/student/projects-parallelism/ansible.cfg"' -u devops  
+  ansible localhost -m get_url -a 'url="http://classroom.example.com/src/projects-parallelism/inventory" dest="/home/student/projects-parallelism/inventory"' -u devops  
+  ansible localhost -m get_url -a 'url="http://classroom.example.com/src/projects-parallelism/playbook.yml" dest="/home/student/projects-parallelism/playbook.yml"' -u devops  
+  ansible localhost -m get_url -a 'url="http://classroom.example.com/src/projects-parallelism/remove_apache.yml" dest="/home/student/projects-parallelism/remove_apache.yml"' -u devops  
+	chown -R student:student /home/student
+  echo "START PASS"
+elif [[ "$1" == "projects-parallelism" ]] && [[ "$2" == "finish" ]] ; then
+#	Remove apache ? 
+	cd /home/student/projects-parallelism
+ echo "FINISH PASS"
+
+elif [[ "$1" == "projects-file" ]] && [[ "$2" == "start" ]] ; then
+	ansible localhost -m file -a 'path="/home/student/projects-file" state="directory"' -u student
+	ansible localhost -m file -a 'path="/home/student/projects-file/plays" state="directory"' -u student
+	ansible localhost -m file -a 'path="/home/student/projects-file/tasks" state="directory"' -u student
+  ansible localhost -m get_url -a 'url="http://classroom.example.com/src/projects-file/ansible.cfg" dest="/home/student/projects-file/ansible.cfg"' -u devops  
+  ansible localhost -m get_url -a 'url="http://classroom.example.com/src/projects-file/inventory" dest="/home/student/projects-file/inventory"' -u devops  
+  ansible localhost -m get_url -a 'url="http://classroom.example.com/src/projects-file/plays/test.yml" dest="/home/student/projects-file/plays/test.yml"' -u devops  
+  ansible localhost -m get_url -a 'url="http://classroom.example.com/src/projects-file/tasks/firewall.yml" dest="/home/student/projects-file/tasks/firewall.yml"' -u devops  
+  ansible localhost -m get_url -a 'url="http://classroom.example.com/src/projects-file/tasks/placeholder.yml" dest="/home/student/projects-file/tasks/placeholder.yml"' -u devops  
+  ansible localhost -m get_url -a 'url="http://classroom.example.com/src/projects-file/tasks/environment.yml" dest="/home/student/projects-file/tasks/environment.yml"' -u devops  
+	chown -R student:student /home/student
+  echo "START PASS"
+elif [[ "$1" == "projects-file" ]] && [[ "$2" == "finish" ]] ; then
+#	FIX me  
+	cd /home/student/projects-file
+ echo "FINISH PASS"
+
+elif [[ "$1" == "projects-review" ]] && [[ "$2" == "start" ]] ; then
+	ansible localhost -m file -a 'path="/home/student/projects-review" state="directory"' -u student
+	ansible localhost -m file -a 'path="/home/student/projects-review/files" state="directory"' -u student
+	ansible localhost -m file -a 'path="/home/student/projects-review/inventory" state="directory"' -u student
+  ansible localhost -m get_url -a 'url="http://classroom.example.com/src/projects-review/ansible.cfg" dest="/home/student/projects-review/ansible.cfg"' -u devops  
+  ansible localhost -m get_url -a 'url="http://classroom.example.com/src/projects-review/inventory/inventory.py" dest="/home/student/projects-review/inventory/inventory.py"' -u devops  
+  ansible localhost -m get_url -a 'url="http://classroom.example.com/src/projects-review/playbook.yml" dest="/home/student/projects-review/playbook.yml"' -u devops  
+  ansible localhost -m get_url -a 'url="http://classroom.example.com/src/projects-review/files/tune.conf" dest="/home/student/projects-review/files/tune.conf"' -u devops  
+	chown -R student:student /home/student
+  echo "START PASS"
+elif [[ "$1" == "projects-review" ]] && [[ "$2" == "finish" ]] ; then
+#	FIX me  
+	cd /home/student/projects-review
+ echo "FINISH PASS"
+
+elif [[ "$1" == "role-system" ]] && [[ "$2" == "start" ]] ; then
+	ansible localhost -m file -a 'path="/home/student/role-system" state="directory"' -u student
+	ansible localhost -m file -a 'path="/home/student/role-system/roles" state="directory"' -u student
+  ansible localhost -m get_url -a 'url="http://classroom.example.com/src/role-system/ansible.cfg" dest="/home/student/role-system/ansible.cfg"' -u devops  
+  ansible localhost -m get_url -a 'url="http://classroom.example.com/src/role-system/inventory" dest="/home/student/role-system/inventory"' -u devops  
+#  ansible localhost -m get_url -a 'url="http://classroom.example.com/src/role-system/ansible.cfg" dest="/home/student/role-system/ansible.cfg"' -u devops  
+  ansible localhost -m get_url -a 'url="http://classroom.example.com/src/role-system/roles/requirements.yml" dest="/home/student/role-system/roles/requirements.yml"' -u devops  
+#  ansible localhost -m get_url -a 'url="http://classroom.example.com/src/projects-file/tasks/placeholder.yml" dest="/home/student/projects-file/tasks/placeholder.yml"' -u devops  
+#  ansible localhost -m get_url -a 'url="http://classroom.example.com/src/projects-file/tasks/environment.yml" dest="/home/student/projects-file/tasks/environment.yml"' -u devops  
+#  ansible localhost -m get_url -a 'url="http://classroom.example.com/src/projects-host/inventory1" dest="/home/student/projects-host/inventory1"' -u devops 
+	chown -R student:student /home/student
+  echo "START PASS"
+elif [[ "$1" == "role-system" ]] && [[ "$2" == "finish" ]] ; then
+#	FIX me  
+	cd /home/student/role-system
+ echo "FINISH PASS"
+
+fi

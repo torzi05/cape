@@ -1,12 +1,14 @@
 # site.yml for External provision
 ---
-- name: External provisioning 
-  hosts: all
-  remote_user: root
-  tasks:
-    - name: Connection test
-      ping:
-
 - name: Global configuration
   import_playbook: plays/global.yml
+
+- name: Workstation configuration
+  import_playbook: plays/workstation.yml
+
+- name: Classroom configuration
+  import_playbook: plays/classroom.yml
+
+- name: Access configuration
+  import_playbook: plays/access.yml
 ...

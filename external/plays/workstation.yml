@@ -1,0 +1,42 @@
+# workstation.yml External provision
+---
+- name: Workstation configuration
+  hosts: control
+  remote_user: root
+  tasks:
+
+    - name: Epel repository
+      package:
+        name: epel-release
+        state: present
+
+    - name: Creating "student" user
+      user: 
+        name: student
+        groups: wheel
+        comment: Student User
+        password: '$6$m5l5c3$6M2HG6i7KMv3vMKA5KPvZamXls0wzmRbxJuuYfLWN0CWVRpqoxAicyI5SBIrAqSU3gu7l4BdMTD7rTR6m.F9z1'
+        generate_ssh_key: true
+
+    - name: Set alias for lab 
+      lineinfile:
+        path: /home/student/.bashrc
+        line: alias lab="sudo /usr/local/bin/lab"
+
+    - name: Set privileges 
+      copy:
+        dest: /etc/sudoers.d/student
+        content: "student ALL = (root) NOPASSWD: /usr/local/bin/lab\n"
+
+    - name: Deploy lab binary
+      copy:
+        src: ./lab
+        dest: /usr/local/bin/lab
+        mode: '0755'
+
+    - name: Fetch public key
+      fetch: 
+        flat: true
+        dest: /tmp/student.pub
+        src: /home/student/.ssh/id_rsa.pub
+...

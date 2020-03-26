@@ -1,0 +1,45 @@
+# classroom.yml external 
+---
+- name: Classroom Configuration
+  hosts: classroom
+  remote_user: root
+  tasks:
+
+    - name: Install Apche
+      package:
+        name: httpd
+        state: present
+
+    - name: Service enable,start
+      service:
+        name: "{{ item }}"
+        state: started
+        enabled: true
+      loop: 
+        - firewalld
+        - httpd
+
+    - name: Firewall settings
+      firewalld:
+        service: http
+        state: enabled
+        permanent: true
+        immediate: true
+      notify: restart httpd
+
+    - name: Sync lab 
+      synchronize:
+        src: "{{ item.src }}"
+        dest: "{{ item.dest }}"
+      loop:
+        - { src: 'files/labs/' , dest: '/var/www/html/labs' }
+        - { src: 'files/src/' , dest: '/var/www/html/src' }
+      notify: restart httpd
+ 
+  handlers:
+    - name: restart httpd
+      service:
+        name: httpd
+        state: restarted
+        enabled: true
+...

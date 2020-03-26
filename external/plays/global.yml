@@ -4,6 +4,13 @@
   hosts: all
   remote_user: root
   tasks:
+
+    - name: Set password for root
+      user:
+        name: root
+        password: "{{ 'redhat' | password_hash('sha512') }}"
+        update_password: always
+                                 
     - name: Generate /etc/hosts
       lineinfile:
         path: "/etc/hosts"
@@ -11,18 +18,28 @@
         line: "{{ ansible_facts.eth1.ipv4.address }} {{ ansible_facts.fqdn }} {{ ansible_facts.hostname }}"
       delegate_to: "{{ item }}"
       loop: "{{ groups['all'] }}"
-    - name: Create /etc/host.aliases
+    - name: Create host aliases
       blockinfile:
         path: "/etc/hosts"
         block: | 
           172.25.250.254 materials.example.com materials
           172.25.250.254 content.example.com content
+
+    - name: Generate known_hosts file
+      lineinfile:
+        path: "~/.ssh/known_hosts"
+        regexp: "^{{ ansible_facts.fqdn }},"
+        line: "{{ ansible_facts.fqdn }},{{ ansible_facts.eth1.ipv4.address }} ecdsa-sha2-nistp256 {{ ansible_facts.ssh_host_key_ecdsa_public }}"
+      delegate_to: "{{ item }}"
+      loop: "{{ groups['all'] }}"
+
     - name: SSH Host Key Checking disabled
       lineinfile:
         path: "/etc/ssh/ssh_config"
         line: StrictHostKeyChecking no
         state: present
       notify: restart ssh
+
     - name: SSH Password Authentication enabled
       lineinfile:
        path: "/etc/ssh/sshd_config"
@@ -30,6 +47,19 @@
        line: PasswordAuthentication yes
        state: present
       notify: restart ssh
+
+    - name: Create user accounts
+      user:
+        name: "{{ item }}"
+      loop:
+        - devops
+        - student
+
+    - name: Set privileges for "devops" user
+      copy:
+        dest: /etc/sudoers.d/devops
+        content: "devops ALL=(ALL) NOPASSWD: ALL"
+                                                                  
   handlers:
     - name: restart ssh
       service:
