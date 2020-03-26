@@ -1,0 +1,6 @@
+[control]
+workstation.lab.example.com
+[managed]
+server[a:d].lab.example.com
+[classroom]
+classroom.example.com

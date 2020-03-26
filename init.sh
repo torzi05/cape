@@ -73,6 +73,7 @@ ansible localhost -b -m lineinfile -a 'path="/etc/hosts" line="172.25.250.10 ser
 ansible localhost -b -m lineinfile -a 'path="/etc/hosts" line="172.25.250.11 serverb serverb.lab.example.com"'
 ansible localhost -b -m lineinfile -a 'path="/etc/hosts" line="172.25.250.12 serverc serverc.lab.example.com"'
 ansible localhost -b -m lineinfile -a 'path="/etc/hosts" line="172.25.250.13 serverd serverd.lab.example.com"'
+ansible localhost -b -m lineinfile -a 'path="/etc/hosts" line="172.25.250.254 classroom classroom.lab.example.com"'
 
 if [[ "$1" == "test" ]] ; then 
 	echo Test run without vagran up
@@ -80,8 +81,11 @@ else
 	cd ~/cape ; vagrant up 
 fi
 	
-list="workstation.lab.example.com servera.lab.example.com serverb.lab.example.com serverc.lab.example.com serverd.lab.example.com"
+list="workstation.lab.example.com servera.lab.example.com serverb.lab.example.com serverc.lab.example.com serverd.lab.example.com classroom.example.com"
 
 for i in $list ; do ansible localhost -m lineinfile -a "path="~/.ssh/known_hosts" regexp="$i" state="absent"" ; done
 for i in $list ; do ssh-keyscan -t ecdsa $i >> ~/.ssh/known_hosts ; done
+
+echo External provisioning
+cd ~/cape/external/ ; ansible-playbook site.yml
 

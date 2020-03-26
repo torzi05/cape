@@ -1,0 +1,9 @@
+# site.yml for External provision
+---
+- name: External provisioning 
+  hosts: all
+  remote_user: root
+  tasks:
+    - name: Connection test
+      ping:
+...
