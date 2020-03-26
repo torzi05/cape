@@ -63,7 +63,7 @@ fi
 #ansible localhost -m lineinfile -a 'path="~/cape" state="directory"'
 
 ansible localhost -b -m yum -a 'name="VirtualBox" state="present"'
-ansible localhost -m get_url -a 'url="https://releases.hashicorp.com/vagrant/2.2.7/vagrant_2.2.7_x86_64.rpm" dest="/tmp/vagrant.rpm"'
+ansible localhost -b -m get_url -a 'url="https://releases.hashicorp.com/vagrant/2.2.7/vagrant_2.2.7_x86_64.rpm" dest="/tmp/vagrant.rpm"'
 ansible localhost -b -m yum -a 'name="/tmp/vagrant.rpm" state="present"'
 ansible localhost -b -m yum -a 'name="git" state="present"'
 ansible localhost -m git -a 'repo="https://github.com/torzi05/cape.git" dest="~/cape"' 
