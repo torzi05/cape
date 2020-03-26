@@ -1,0 +1,39 @@
+# global.yml Lab Global configuration
+---
+- name: Global configuration 
+  hosts: all
+  remote_user: root
+  tasks:
+    - name: Generate /etc/hosts
+      lineinfile:
+        path: "/etc/hosts"
+        regexp: "^{{ ansible_facts.eth1.ipv4.address }}\\s{{ ansible_facts.fqdn }}"
+        line: "{{ ansible_facts.eth1.ipv4.address }} {{ ansible_facts.fqdn }} {{ ansible_facts.hostname }}"
+      delegate_to: "{{ item }}"
+      loop: "{{ groups['all'] }}"
+    - name: Create /etc/host.aliases
+      blockinfile:
+        path: "/etc/hosts"
+        block: | 
+          172.25.250.254 materials.example.com materials
+          172.25.250.254 content.example.com content
+    - name: SSH Host Key Checking disabled
+      lineinfile:
+        path: "/etc/ssh/ssh_config"
+        line: StrictHostKeyChecking no
+        state: present
+      notify: restart ssh
+    - name: SSH Password Authentication enabled
+      lineinfile:
+       path: "/etc/ssh/sshd_config"
+       regexp: '^PasswordAuthentication'
+       line: PasswordAuthentication yes
+       state: present
+      notify: restart ssh
+  handlers:
+    - name: restart ssh
+      service:
+        name: sshd
+        state: restarted
+        enabled: true
+...

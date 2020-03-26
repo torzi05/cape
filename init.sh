@@ -66,7 +66,7 @@ ansible localhost -b -m yum -a 'name="VirtualBox" state="present"'
 ansible localhost -b -m get_url -a 'url="https://releases.hashicorp.com/vagrant/2.2.7/vagrant_2.2.7_x86_64.rpm" dest="/tmp/vagrant.rpm"'
 ansible localhost -b -m yum -a 'name="/tmp/vagrant.rpm" state="present"'
 ansible localhost -b -m yum -a 'name="git" state="present"'
-ansible localhost -m git -a 'repo="https://github.com/torzi05/cape.git" dest="~/cape"' 
+ansible localhost -m git -a 'repo="https://github.com/torzi05/cape.git" dest="~/cape" force="yes"' 
 
 ansible localhost -b -m lineinfile -a 'path="/etc/hosts" line="172.25.250.9 workstation workstation.lab.example.com"'
 ansible localhost -b -m lineinfile -a 'path="/etc/hosts" line="172.25.250.10 servera servera.lab.example.com"'
@@ -76,7 +76,7 @@ ansible localhost -b -m lineinfile -a 'path="/etc/hosts" line="172.25.250.13 ser
 ansible localhost -b -m lineinfile -a 'path="/etc/hosts" line="172.25.250.254 classroom classroom.lab.example.com"'
 
 if [[ "$1" == "test" ]] ; then 
-	echo Test run without vagran up
+	echo Test run without vagrant up
 else
 	cd ~/cape ; vagrant up 
 fi

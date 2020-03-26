@@ -6,4 +6,7 @@
   tasks:
     - name: Connection test
       ping:
+
+- name: Global configuration
+  import_playbook: plays/global.yml
 ...
