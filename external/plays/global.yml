@@ -25,6 +25,11 @@
           172.25.250.254 materials.example.com materials
           172.25.250.254 content.example.com content
 
+    - name: Create known_hosts file
+      file:
+        path: ~/.ssh/known_hosts
+        state: touch
+
     - name: Generate known_hosts file
       lineinfile:
         path: "~/.ssh/known_hosts"

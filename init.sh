@@ -84,6 +84,7 @@ fi
 st_fqdn="workstation.lab.example.com servera.lab.example.com serverb.lab.example.com serverc.lab.example.com serverd.lab.example.com classroom.example.com"
 list_ip="172.25.250.9 172.25.250.10 172.25.250.11 172.25.250.12 172.25.250.13 172.25.250.254 "
 for i in $list_fqdn ; do ansible localhost -m lineinfile -a "path="~/.ssh/known_hosts" regexp="$i" state="absent"" ; done
+for i in $list_ip ; do ansible localhost -m lineinfile -a "path="~/.ssh/known_hosts" regexp="$i" state="absent"" ; done
 for i in $list_ip ; do ssh-keyscan -t ecdsa $i >> ~/.ssh/known_hosts ; done
 
 echo External provisioning
