@@ -68,11 +68,11 @@ ansible localhost -b -m yum -a 'name="/tmp/vagrant.rpm" state="present"'
 ansible localhost -b -m yum -a 'name="git" state="present"'
 ansible localhost -m git -a 'repo="https://github.com/torzi05/cape.git" dest="~/cape"' 
 
-ansible localhost -b -m lineinfile -a 'path="/etc/hosts" line="172.15.250.9 workstation workstation.lab.example.com"'
-ansible localhost -b -m lineinfile -a 'path="/etc/hosts" line="172.15.250.10 servera servera.lab.example.com"'
-ansible localhost -b -m lineinfile -a 'path="/etc/hosts" line="172.15.250.11 serverb serverb.lab.example.com"'
-ansible localhost -b -m lineinfile -a 'path="/etc/hosts" line="172.15.250.12 serverc serverc.lab.example.com"'
-ansible localhost -b -m lineinfile -a 'path="/etc/hosts" line="172.15.250.13 serverd serverd.lab.example.com"'
+ansible localhost -b -m lineinfile -a 'path="/etc/hosts" line="172.25.250.9 workstation workstation.lab.example.com"'
+ansible localhost -b -m lineinfile -a 'path="/etc/hosts" line="172.25.250.10 servera servera.lab.example.com"'
+ansible localhost -b -m lineinfile -a 'path="/etc/hosts" line="172.25.250.11 serverb serverb.lab.example.com"'
+ansible localhost -b -m lineinfile -a 'path="/etc/hosts" line="172.25.250.12 serverc serverc.lab.example.com"'
+ansible localhost -b -m lineinfile -a 'path="/etc/hosts" line="172.25.250.13 serverd serverd.lab.example.com"'
 
 cd ~/cape ; vagrant up 
 
