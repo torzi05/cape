@@ -74,8 +74,12 @@ ansible localhost -b -m lineinfile -a 'path="/etc/hosts" line="172.25.250.11 ser
 ansible localhost -b -m lineinfile -a 'path="/etc/hosts" line="172.25.250.12 serverc serverc.lab.example.com"'
 ansible localhost -b -m lineinfile -a 'path="/etc/hosts" line="172.25.250.13 serverd serverd.lab.example.com"'
 
-cd ~/cape ; vagrant up 
-
+if [[ "$1" == "test" ]] ; then 
+	echo Test run without vagran up
+else
+	cd ~/cape ; vagrant up 
+fi
+	
 list="workstation.lab.example.com servera.lab.example.com serverb.lab.example.com serverc.lab.example.com serverd.lab.example.com"
 
 for i in $list ; do ansible localhost -m lineinfile -a "path="~/.ssh/known_hosts" regexp="$i" state="absent"" ; done
