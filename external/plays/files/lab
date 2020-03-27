@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# ch01s04
 if [[ "$1" == "intro-install" ]] && [[ "$2" == "start" ]] ; then
 	echo -e "\nSetting up the environment for the exercise:\n"	
 	yum remove -y ansible &> /dev/null 
@@ -7,50 +8,105 @@ if [[ "$1" == "intro-install" ]] && [[ "$2" == "start" ]] ; then
 elif [[ "$1" == "intro-install" ]] && [[ "$2" == "finish" ]] ; then
 	echo -e "\nCleaning up the environment:\n"	 
 	echo -e "  - Cleaning up: \e[1;32mSUCCESS\e[0;39m\n"
-
+# ch02s02
 elif [[ "$1" == "deploy-inventory" ]] && [[ "$2" == "start" ]] ; then
-	echo -e "\nSetting up workstation lab for the exercise:\n"	
+	echo -e "\nSetting up workstation lab for the exercise work:\n"	
 	yum install -y ansible &> /dev/null 
 	echo -e "  - Verify ansible is installed on workstation control node: \e[1;32mSUCCESS\e[0;39m"
 	cp /etc/ansible/hosts /etc/ansible/hosts.bak &>/dev/null	
 	echo -e "  - Backup /etc/ansible/hosts inventory:                     \e[1;32mSUCCESS\e[0;39m\n"
-
 elif [[ "$1" == "deploy-inventory" ]] && [[ "$2" == "finish" ]] ; then
 	echo -e "\nCleaning up the environment:\n" 
 	mv /etc/ansible/hosts.bak /etc/ansible/hosts &>/dev/null
 	chmod 644 /etc/ansible/hosts &>/dev/null	
 	echo -e "  - Restore /etc/ansible/hosts: \e[1;32mSUCCESS\e[0;39m\n"
-
+# ch02s04
 elif [[ "$1" == "deploy-manage" ]] && [[ "$2" == "start" ]] ; then
-	ping -c1 servera &>/dev/null	
-		if [[ "$?" -eq "0" ]] ; then
-  		echo "START PASS"
-		else
-			echo "Env. error"
-			exit 2
-		fi
+	echo -e "\nSetting up workstation lab for the exercise work:\n"	
+	yum install -y ansible &> /dev/null 
+	echo -e "  - Verify ansible is installed on workstation: \e[1;32mSUCCESS\e[0;39m\n"
+#	ping -c1 servera &>/dev/null	
+#		if [[ "$?" -eq "0" ]] ; then
+#  		echo "START PASS"
+#		else
+#			echo "Env. error"
+#			exit 2
+#		fi
 elif [[ "$1" == "deploy-manage" ]] && [[ "$2" == "finish" ]] ; then
-  echo "FINISH PASS"
-
+	echo -e "\nCleaning up the environment:\n" 
+	echo -e "  - Cleaning up workstation: \e[1;32mSUCCESS\e[0;39m\n"
+# ch02s06
 elif [[ "$1" == "deploy-adhoc" ]] && [[ "$2" == "start" ]] ; then
-	mkdir /home/student/deploy-adhoc
+	echo -e "\nSetting up workstation lab for the exercise work:\n"	
+	yum install -y ansible &> /dev/null 
+	echo -e "  - Verify ansible is installed on workstation: \e[1;32mSUCCESS\e[0;39m"
+	mkdir /home/student/deploy-adhoc &>/dev/null
+	echo -e "  - Create exercise directory:                  \e[1;32mSUCCESS\e[0;39m"
 	cd /home/student/deploy-adhoc
 	echo -e '[defaults]\ninventory=inventory' > ansible.cfg 		
 	echo -e '[control_node]\nlocalhost\n\n[intranetweb]\nservera.lab.example.com' > inventory
+	echo -e "  - Download Ansible configuration:             \e[1;32mSUCCESS\e[0;39m"
+	echo -e "  - Download Ansible inventory:                 \e[1;32mSUCCESS\e[0;39m\n"
 	chown -R student:student /home/student
-  echo "START PASS"
 elif [[ "$1" == "deploy-adhoc" ]] && [[ "$2" == "finish" ]] ; then
-	cd /home/student/deploy-adhoc
-	sudo -u student ansible all -m copy -a 'dest="/etc/motd" content=""' -u devops --become 
-  echo "FINISH PASS"
+ 	echo -e "\nCleaning up the environment:\n" 
+	cd /home/student/deploy-adhoc 
+	sudo -u student ansible all -m copy -a 'dest="/etc/motd" content=""' -u devops --become &>/dev/null
+	echo -e "  - Restore /etc/motd: \e[1;32mSUCCESS\e[0;39m\n"
 
+# ch02s07
 elif [[ "$1" == "deploy-review" ]] && [[ "$2" == "start" ]] ; then
-# < ? >
-  echo "START PASS"
+	echo -e "\nSetting up workstation lab for the exercise work:\n"	
+	yum install -y ansible &> /dev/null 
+	echo -e "  - Verify ansible is installed on workstation: \e[1;32mSUCCESS\e[0;39m\n"
+
+elif [[ "$1" == "deploy-review" ]] && [[ "$2" == "grade" ]] ; then
+	echo -e "\nGrading the student\`s work on workstation:\n"	
+	yum install -y ansible &> /dev/null 
+
+	#check files
+	if [[ -f "/home/student/deploy-review/ansible.cfg" ]] && [[ -f "/home/student/deploy-review/inventory/inventory" ]] ; then
+		echo -e "  - Verify active configuration file: \e[1;32mPASS\e[0;39m" ; r1=0
+	else	
+		echo -e "  - Verify active configuration file: \e[1;31mFAIL\e[0;39m" ; r1=1
+	fi
+	#servera
+	if [[ "$(sudo -u student ssh servera.lab.example.com cat /etc/motd)" == "This server is managed by Ansible." ]] ; then
+		echo -e "  - Verify servera /etc/motd:         \e[1;32mPASS\e[0;39m" ; r2=0
+	else	
+		echo -e "  - Verify servera /etc/motd:         \e[1;31mFAIL\e[0;39m" ; r2=1
+	fi
+	#serverb
+	if [[ "$(sudo -u student ssh serverb.lab.example.com cat /etc/motd)" == "This server is managed by Ansible." ]] ; then
+		echo -e "  - Verify serverb /etc/motd:         \e[1;32mPASS\e[0;39m" ; r3=0
+	else	
+		echo -e "  - Verify serverb /etc/motd:         \e[1;31mFAIL\e[0;39m" ; r3=1
+	fi
+	#serverc
+	if [[ "$(sudo -u student ssh serverc.lab.example.com cat /etc/motd)" == "This server is managed by Ansible." ]] ; then
+		echo -e "  - Verify serverc /etc/motd:         \e[1;32mPASS\e[0;39m" ; r4=0
+	else	
+		echo -e "  - Verify serverc /etc/motd:         \e[1;31mFAIL\e[0;39m" ; r4=1
+	fi
+	#serverd
+	if [[ "$(sudo -u student ssh serverd.lab.example.com cat /etc/motd)" == "This server is managed by Ansible." ]] ; then
+		echo -e "  - Verify serverd /etc/motd:         \e[1;32mPASS\e[0;39m\n" ; r5=0
+	else	
+		echo -e "  - Verify serverd /etc/motd:         \e[1;31mFAIL\e[0;39m\n" ; r5=1
+	fi
+	# summary
+	rs=$((r1+r2+r3+r4+r5))
+	if [[ "$rs" -eq "0" ]] ; then
+		echo -e "Overall lab grade:                    \e[1;32mPASS\e[0;39m\n"	
+	else	
+		echo -e "Overall lab grade:                    \e[1;31mFAIL\e[0;39m\n"	
+	fi
+
 elif [[ "$1" == "deploy-review" ]] && [[ "$2" == "finish" ]] ; then
+ 	echo -e "\nCleaning up the environment:\n" 
 	cd /home/student/deploy-review
-	sudo -u student ansible all -m copy -a 'dest="/etc/motd" content=""' -u devops --become 
-  echo "FINISH PASS"
+	sudo -u student ansible all -m copy -a 'dest="/etc/motd" content=""' -u devops --become &>/dev/null
+	echo -e "  - Restore /etc/motd: \e[1;36mSUCCESS\e[0;39m\n"
 
 
 elif [[ "$1" == "playbook-basic" ]] && [[ "$2" == "start" ]] ; then
