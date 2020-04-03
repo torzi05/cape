@@ -5,9 +5,12 @@
   remote_user: root
   tasks:
 
-    - name: Install Apche
+    - name: Install packages
       package:
-        name: httpd
+        name:
+          - httpd
+          - chrony
+          - createrepo
         state: present
 
     - name: Service enable,start
@@ -18,14 +21,28 @@
       loop: 
         - firewalld
         - httpd
+        - chronyd
+
+    - name: Chrony server 
+      lineinfile:
+        path: /etc/chrony.conf
+        line: allow 172.25.250.0/24
+      notify: restart crond
 
     - name: Firewall settings
       firewalld:
-        service: http
+        service: "{{ item }}"
         state: enabled
         permanent: true
         immediate: true
-      notify: restart httpd
+      loop:
+        - http
+        - ntp
+
+    - name: Create directory for repository 
+      file:
+        path: /var/www/html/yum/repository
+        recurse: yes
 
     - name: Sync lab 
       synchronize:
@@ -34,12 +51,25 @@
       loop:
         - { src: 'files/labs/' , dest: '/var/www/html/labs' }
         - { src: 'files/src/' , dest: '/var/www/html/src' }
+        - { src: 'files/repo/' , dest: '/var/www/html/yum/repository' } 
+        - { src: 'files/git/' , dest: '/home/devops/git' }
       notify: restart httpd
+
+    - name: Create repository 
+      shell:
+        cmd: createrepo_c ./
+        chdir: /var/www/html/yum/repository
  
   handlers:
     - name: restart httpd
       service:
         name: httpd
+        state: restarted
+        enabled: true
+
+    - name: restart chronyd
+      service:
+        name: chronyd
         state: restarted
         enabled: true
 ...

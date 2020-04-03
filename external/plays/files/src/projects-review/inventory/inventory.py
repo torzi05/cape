@@ -11,9 +11,9 @@ pipe = Popen(['getent', 'hosts'], stdout=PIPE, universal_newlines=True)
 
 result['all']['hosts'] = []
 for line in pipe.stdout.readlines():
-	s = line.split()
-	if s[1].startswith('w','s'):
-		result['all']['hosts'].append(s[1])
+    s = line.split()
+    if s[1].startswith(('w','s')):
+        result['all']['hosts'].append(s[1])
 
 result['all']['vars'] = {}
 

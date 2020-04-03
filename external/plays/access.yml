@@ -5,7 +5,7 @@
   remote_user: root
   tasks:
     
-    - name: Create .shh directory
+    - name: Create .ssh directory
       file:
         path: "{{ item }}.ssh"
         state: directory
@@ -32,6 +32,28 @@
         - student
         - devops
         - root
+
+    - name: Create .ssh directory for git
+      file:
+        path: /home/git/.ssh
+        state: directory
+      delegate_to: workstation.lab.example.com
+      run_once: true
+
+    - name: Create authorized_keys file for git
+      file:
+        path: /home/git/.ssh/authorized_keys
+        state: touch 
+      delegate_to: workstation.lab.example.com
+      run_once: true
+
+    - name: Deploy SSH public key for git
+      authorized_key:
+        user: git
+        key: "{{ lookup ('file', '/tmp/student.pub')}}"
+        state: present     
+      delegate_to: workstation.lab.example.com
+      run_once: true
 
     - name: Remove temp files
       file:

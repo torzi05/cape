@@ -17,6 +17,11 @@
         comment: Student User
         password: '$6$m5l5c3$6M2HG6i7KMv3vMKA5KPvZamXls0wzmRbxJuuYfLWN0CWVRpqoxAicyI5SBIrAqSU3gu7l4BdMTD7rTR6m.F9z1'
         generate_ssh_key: true
+    
+    - name: Creating "git" technical user
+      user:
+        name: git
+        comment: Git technical user
 
     - name: Set alias for lab 
       lineinfile:
