@@ -27,7 +27,7 @@
       lineinfile:
         path: /etc/chrony.conf
         line: allow 172.25.250.0/24
-      notify: restart crond
+      notify: restart chronyd
 
     - name: Firewall settings
       firewalld:
