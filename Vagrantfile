@@ -26,7 +26,7 @@ Vagrant.configure("2") do |config|
 
 	config.vm.define "serverb" do |serverb|
 		serverb.vm.box = "centos/8"
-		serverb.vm.hostname = "servera.lab.example.com"
+		serverb.vm.hostname = "serverb.lab.example.com"
 		serverb.vm.network "private_network" , ip: "172.25.250.11"
 		serverb.vm.network "private_network" , ip: "172.25.250.101"
 		serverb.vm.provider :virtualbox do |b|
@@ -39,7 +39,7 @@ Vagrant.configure("2") do |config|
 
 	config.vm.define "serverc" do |serverc|
 		serverc.vm.box = "centos/8"
-		serverc.vm.hostname = "servera.lab.example.com"
+		serverc.vm.hostname = "serverc.lab.example.com"
 		serverc.vm.network "private_network" , ip: "172.25.250.12"
 		serverc.vm.network "private_network" , ip: "172.25.250.102"
 		serverc.vm.provider :virtualbox do |c|
@@ -52,7 +52,7 @@ Vagrant.configure("2") do |config|
 
 	config.vm.define "serverd" do |serverd|
 		serverd.vm.box = "centos/8"
-		serverd.vm.hostname = "servera.lab.example.com"
+		serverd.vm.hostname = "serverd.lab.example.com"
 		serverd.vm.network "private_network" , ip: "172.25.250.13"
 		serverd.vm.network "private_network" , ip: "172.25.250.103"
 		serverd.vm.provider :virtualbox do |d|
